@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Explore a project-led portfolio of Power Platform applications, practical automation and problem solving. Demonstrations use fictional data.">
+  <meta name="theme-color" content="#183c34">
+  <title>Built with purpose | Interactive portfolio</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/sans.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="#" aria-label="Built with purpose, home"><span class="brand-mark" aria-hidden="true">b<span>↗</span></span><span>built with<br><strong>purpose.</strong></span></a>
+  <nav aria-label="Main navigation"><a href="#work">Explore the projects</a><a href="#about">Behind the work</a></nav>
+</header>
+<main id="main"><p class="demo-load-note wrap" data-demo-fallback role="status">Loading the interactive demo. If this message stays visible, reload the page and check that all website files were uploaded.</p>
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="live-dot"></span> <span id="hero-focus">Early-career / Power Platform & automation</span></p>
+      <h1 id="hero-title">Less friction.<br>More <em>working<br class="desktop-break"> software.</em></h1>
+      <p class="hero-description">I turn everyday processes into apps people can use. Open a project, change something and follow what happens next.</p>
+      <div class="hero-actions"><a id="primary-explore" class="button button-dark" href="#work"><span id="primary-explore-label" class="button-label">Explore the projects</span> <span aria-hidden="true">↗</span></a><a class="text-button" href="shirt-studio.html">Try Shirt Studio <span aria-hidden="true">→</span></a></div>
+      <p class="quiet hero-footnote">A portfolio you can explore, not just read.</p>
+    </div>
+    <div class="hero-stage" aria-label="Preview of the parcel demonstration">
+      <div class="stage-grid" aria-hidden="true"></div>
+      <span class="stage-caption mono">01 / FROM PROCESS TO PRODUCT</span>
+      <div class="floating-tag"><span class="dot"></span> Built with Power Platform</div>
+      <div class="mini-dashboard">
+        <div class="mini-header"><span class="mini-logo" aria-hidden="true">▦</span> Parcel Operations <span class="mini-menu" aria-hidden="true">•••</span></div>
+        <div class="mini-label">COLLECTION OVERVIEW <span>DEMO</span></div>
+        <div class="mini-stats"><div><strong id="hero-collected">1<span>/6</span></strong><small>parcels collected</small></div><div class="mini-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="mini-progress"><span id="hero-progress"></span></div>
+        <div class="mini-locations"><span><i></i> North hub</span><span>3 parcels <b>→</b></span></div>
+        <div class="mini-locations"><span><i></i> Studio</span><span>2 parcels <b>→</b></span></div>
+        <div class="mini-locations"><span><i></i> East hub</span><span>1 parcel <b>→</b></span></div>
+      </div>
+      <div class="phone-card">
+        <div class="phone-top"><span>COLLECTOR</span><span aria-hidden="true">↗</span></div>
+        <div class="parcel-icon" aria-hidden="true"><svg viewBox="0 0 80 80"><path d="M13 25 40 10l27 15v31L40 72 13 56Z"/><path d="m13 25 27 16 27-16M40 41v31M27 17l27 16v12"/></svg></div>
+        <span class="phone-status">Ready to collect</span><strong>One tap.<br>Everyone updated.</strong>
+        <a href="#playground" class="phone-action">Try a collection <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="stage-note"><span aria-hidden="true">↳</span> Workflow recreation.<br><b>Fictional data.</b></div>
+      <div class="stage-bottom mono">POWER APPS · DATAVERSE · AUTOMATION</div>
+    </div>
+  </section>
+
+  <section id="work" class="work wrap">
+    <div class="section-heading"><div><p class="eyebrow">Selected work / 3 projects</p><h2>Practical problems.<br><em>Thoughtful builds.</em></h2></div><p>Three projects. Three ways to play.<br>Change an input, make a decision<br>and watch the workflow respond.</p></div>
+
+    <article class="featured-project" id="playground">
+      <div class="project-intro"><div><span class="project-number mono">01 / OPERATIONS</span><h3>Parcel Operations</h3><p>A mobile collector and dashboard for keeping parcel collections visible across locations.</p></div><div class="project-status"><span class="status-dot"></span> Collector complete<br><small>Wider system in development</small></div></div>
+      <div class="project-subnav"><div class="tags"><span>Power Apps</span><span>Dataverse</span><span>Mobile UI</span></div><button class="text-button small" data-story="parcel">Behind the build <span aria-hidden="true">↗</span></button></div>
+      <div class="demo-shell">
+        <div class="demo-topbar"><span class="demo-brand"><span aria-hidden="true">▦</span> Parcel control <small>Interactive demonstration</small></span><button id="reset-demo" class="reset-button">↺ <span>Reset demo</span></button></div>
+        <div class="demo-notice"><span class="notice-dot"></span> Fictional records · browser simulation · no live connections</div>
+        <div class="demo-metrics" id="demo-metrics" aria-label="Parcel totals"></div>
+        <div class="demo-workspace">
+          <div class="parcel-list-pane">
+            <div class="parcel-list-head"><h4>Collections</h4><button id="guide-demo" class="guide-button">Start a 60-second tour <span aria-hidden="true">↗</span></button></div>
+            <label class="search-label"><span aria-hidden="true">⌕</span><input id="parcel-search" type="search" placeholder="Search a parcel or location" aria-label="Search parcels"></label>
+            <div class="filters" role="group" aria-label="Filter parcels"><button data-filter="all" aria-pressed="true">All</button><button data-filter="ready" aria-pressed="false">Ready</button><button data-filter="collected" aria-pressed="false">Collected</button><button data-filter="issue" aria-pressed="false">Issues</button></div>
+            <div id="parcel-list" class="parcel-list"></div>
+          </div>
+          <div class="parcel-detail" id="parcel-detail"></div>
+        </div>
+        <div class="activity-strip" role="status" aria-live="polite"><span class="activity-dot"></span><span id="activity-message">Choose a parcel, then record a collection or flag an issue.</span></div>
+      </div>
+      <div class="project-takeaway"><span class="eyebrow">What this demonstrates</span><p id="parcel-takeaway">Related records, clear collection states and one shared view of progress.</p><span class="mono">01 / 03</span></div>
+    </article>
+
+    <div class="other-projects">
+      <article class="project-card shirt-project">
+        <a href="shirt-studio.html" class="project-card-visual shirt-visual" aria-label="Open the interactive Shirt Studio demo"><div class="shirt-label mono">STUDIO / REVIEW 008</div><svg class="shirt-svg" viewBox="0 0 340 250"><path d="m115 24-36 15-58 52 40 43 37-27v125h144V107l37 27 40-43-58-52-36-15c-6 25-23 36-55 36s-49-11-55-36Z"/><path class="shirt-seam" d="M115 24c10 40 99 40 110 0M99 68l-1 39m144-39v39"/><text x="170" y="128">OFF</text><text x="170" y="166">DUTY.</text><text class="shirt-small-text" x="170" y="183">A FICTIONAL DESIGN</text></svg><span class="review-tag"><i></i> Ready for review</span><span class="visual-corner mono">IDEA → REVIEW → DRAFT</span></a>
+        <div class="project-card-body"><p class="project-number mono">02 / CREATIVE WORKFLOWS</p><h3>Shirt Studio</h3><p>A mobile control centre for design ideas, review decisions and the next stage of a product workflow.</p><div class="tags"><span>Power Apps</span><span>Power Automate</span><span>Gelato API</span></div><div class="card-bottom"><span class="project-state">App published · integrations developing</span><a class="project-launch" href="shirt-studio.html">Open studio <span aria-hidden="true">↗</span></a></div></div>
+      </article>
+      <article class="project-card artwork-project">
+        <a href="artwork-workflow.html" class="project-card-visual artwork-visual" aria-label="Open the interactive Artwork Workflow demo"><div class="art-label mono">ARTWORK / ORIENTATION</div><div class="art-frames"><div class="art-frame portrait"><div class="abstract-art"><i></i><b></b></div><span>1 : 1.414</span></div><div class="art-frame landscape"><div class="abstract-art"><i></i><b></b></div><span>1.414 : 1</span></div></div><span class="visual-corner mono">BRIEF → APPROVAL → ARTWORK</span></a>
+        <div class="project-card-body"><p class="project-number mono">03 / CONTENT OPERATIONS</p><h3>Artwork Workflow</h3><p>A structured journey from an idea to a design brief, with orientation rules and controlled processing.</p><div class="tags"><span>Dataverse</span><span>SharePoint</span><span>Power Automate</span></div><div class="card-bottom"><span class="project-state">Core workflows in development</span><a class="project-launch" href="artwork-workflow.html">Open workflow <span aria-hidden="true">↗</span></a></div></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="about" class="portfolio-close wrap"><div><p class="eyebrow">Behind the work</p><h2>Built around tasks.<br><em>Made for people.</em></h2><p>These are browser recreations of my personal Power Platform projects. They make the interfaces, decisions and workflows explorable without opening private systems. Each demo shows its own build status.</p></div><div class="portfolio-close-note"><span class="mono">Explore the workflows</span><p>Computer Science CertHE.<br>Power Platform, Python and APIs.<br>Practical applications, still evolving.</p><a class="button button-dark" href="artwork-workflow.html">Try Artwork Workflow <span aria-hidden="true">↗</span></a></div></section>
+</main>
+<footer class="site-footer wrap"><a class="brand" href="#"><span class="brand-mark" aria-hidden="true">b<span>↗</span></span><span>built with<br><strong>purpose.</strong></span></a><p>Personal details are withheld from this portfolio.<br>All interactive examples use fictional data.</p><a href="#main" class="text-button">Back to the top <span aria-hidden="true">↑</span></a></footer>
+
+<dialog id="story-dialog" class="story-dialog"><div class="dialog-top"><span class="eyebrow">A closer look</span><button class="close-button" data-close aria-label="Close project details">×</button></div><div id="story-content"></div></dialog>
+<noscript><div class="noscript-note">The portfolio is readable without JavaScript. Enable JavaScript to use the demonstrations.</div></noscript>
+</body>
+</html>

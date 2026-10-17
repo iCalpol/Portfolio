@@ -1,0 +1,111 @@
+const clone=value=>structuredClone(value);
+const event=(state,message)=>{state.events.push({id:state.events.length+1,time:new Date().toLocaleTimeString('en-GB'),message});return state;};
+const requirePhase=(state,phases)=>{if(!phases.includes(state.phase))throw Error('Finish the current step before continuing.');};
+export const SHIRT_COLOURS={cream:{name:'Chalk',fabric:'#f2eadb',shade:'#d1c4af',ink:'#253d34'},ink:{name:'Forest',fabric:'#294c41',shade:'#17392e',ink:'#f2eacb'},rose:{name:'Clay',fabric:'#dba9a1',shade:'#b77f79',ink:'#4e3030'}};
+export function createStudio(){return {phase:'idea',input:{text:'OFF DUTY.',style:'editorial',colour:'cream'},revision:0,design:null,feedback:[],listing:{title:'OFF DUTY Studio Tee',price:28,sizes:['S','M','L']},draft:null,events:[{id:1,time:'Start',message:'Studio opened. Start with an idea.'}]};}
+export function studioAction(current,action){
+ if(action.type==='RESET')return createStudio();
+ const s=clone(current);
+ switch(action.type){
+  case 'EDIT':{
+   if(['building','creating'].includes(s.phase))throw Error('The current step is still running.');
+   const input={...s.input,...action.patch};input.text=String(input.text).slice(0,48);
+   if(!SHIRT_COLOURS[input.colour]||!['editorial','varsity','minimal'].includes(input.style))throw Error('Choose a valid design option.');
+   if(JSON.stringify(input)===JSON.stringify(s.input))return current;
+   if(s.design)event(s,'Design changed. A new review is required.');
+   s.input=input;s.phase='idea';s.design=null;s.draft=null;return s;
+  }
+  case 'BUILD':
+   requirePhase(s,['idea','revision']);if(!s.input.text.trim())throw Error('Give your design a few words first.');
+   s.phase='building';s.draft=null;return event(s,'Idea captured. Preparing the design preview.');
+  case 'DESIGN_READY':
+   requirePhase(s,['building']);s.revision++;s.design={...s.input,version:s.revision,approved:false};s.phase='review';
+   s.listing.title=s.input.text.trim().replace(/\s+/g,' ').replace(/[.!?]+$/,'')+' Studio Tee';return event(s,`Design v${s.revision} is ready for review.`);
+  case 'REJECT':{
+   requirePhase(s,['review']);const reason=String(action.reason||'').trim().slice(0,180);
+   if(reason.length<3)throw Error('Add a short reason for the revision.');
+   s.feedback.push({version:s.revision,decision:'Revise',reason});s.phase='revision';return event(s,'Revision requested: '+reason);
+  }
+  case 'REVISE':requirePhase(s,['revision','review']);s.phase='idea';s.design=null;s.draft=null;return event(s,'Back to the idea. Previous feedback stays in the record.');
+  case 'APPROVE':requirePhase(s,['review']);s.design.approved=true;s.phase='approved';s.feedback.push({version:s.revision,decision:'Approved',reason:''});return event(s,`Design v${s.revision} approved. Product setup unlocked.`);
+  case 'LISTING':requirePhase(s,['approved']);s.listing={...s.listing,...action.patch};return s;
+  case 'CREATE_DRAFT':
+   requirePhase(s,['approved']);if(!s.design?.approved)throw Error('Approve a design before creating a draft.');
+   if(!s.listing.title.trim())throw Error('Add a product title.');
+   if(!Number.isFinite(Number(s.listing.price))||Number(s.listing.price)<1||Number(s.listing.price)>999)throw Error('Use a demo price between £1 and £999.');
+   if(!s.listing.sizes.length)throw Error('Choose at least one size.');
+   s.phase='creating';return event(s,'Preparing sample product data and draft listing.');
+  case 'DRAFT_READY':requirePhase(s,['creating']);s.phase='draft';s.draft={id:`DEMO-DRAFT-${String(s.revision).padStart(3,'0')}`,status:'Draft',title:s.listing.title.trim(),price:Number(s.listing.price),sizes:[...s.listing.sizes],designVersion:s.revision};return event(s,'Sample listing saved as a draft. Nothing has been published.');
+  default:throw Error('Unknown studio action.');
+ }
+}
+
+export const ART_PALETTES={moss:{name:'Moss & stone',sky:'#dbe3d4',light:'#f3e8ce',mid:'#8fa78e',dark:'#345d50',accent:'#dbaf78'},dusk:{name:'After hours',sky:'#dbcfda',light:'#f0dcd3',mid:'#ae8b9b',dark:'#60556e',accent:'#dc936e'},sun:{name:'Golden hour',sky:'#efe0bc',light:'#fbefd9',mid:'#c0af77',dark:'#4b756a',accent:'#e6b253'}};
+export const PRINT_FORMATS={A4:[210,297],A3:[297,420],A2:[420,594],A1:[594,841]};
+export function printSpec(input){
+ const dims=PRINT_FORMATS[input.format];if(!dims)throw Error('Choose an available print size.');
+ const [w,h]=input.orientation==='portrait'?dims:[dims[1],dims[0]];
+ const fullWidth=w+8,fullHeight=h+8;
+ const short=input.quality==='print'?8000:1200,long=Math.round(short*Math.SQRT2);
+ return {trimWidth:w,trimHeight:h,fullWidth,fullHeight,bleed:4,dpi:300,pixels:[Math.round(fullWidth/25.4*300),Math.round(fullHeight/25.4*300)],source:input.orientation==='portrait'?[short,long]:[long,short]};
+}
+export function createArtwork(){return {phase:'idea',input:{title:'Somewhere quieter',theme:'coast',palette:'moss',orientation:'portrait',format:'A3',quality:'print'},brief:null,artwork:null,checks:null,output:null,events:[{id:1,time:'Start',message:'Workspace opened. Shape an artwork brief.'}]};}
+export function artworkAction(current,action){
+ if(action.type==='RESET')return createArtwork();
+ const s=clone(current);
+ switch(action.type){
+  case 'EDIT':{
+   if(['briefing','rendering','checking','packaging'].includes(s.phase))throw Error('The current step is still running.');
+   const next={...s.input,...action.patch};next.title=String(next.title).slice(0,60);
+   if(!ART_PALETTES[next.palette]||!PRINT_FORMATS[next.format]||!['coast','mountains','abstract'].includes(next.theme)||!['portrait','landscape'].includes(next.orientation)||!['print','draft'].includes(next.quality))throw Error('Choose an available artwork setting.');
+   const conceptChanged=['title','theme','palette','orientation'].some(k=>s.input[k]!==next[k]);
+   const outputChanged=['format','quality'].some(k=>s.input[k]!==next[k]);
+   if(!conceptChanged&&!outputChanged)return current;
+   s.input=next;s.checks=null;s.output=null;
+   if(conceptChanged){if(s.brief)event(s,'Concept changed. The brief needs a fresh approval.');s.brief=null;s.artwork=null;s.phase='idea';}
+   else if(s.artwork){s.phase='artwork';event(s,'Output settings changed. Print checks need to run again.');}
+   return s;
+  }
+  case 'BRIEF':requirePhase(s,['idea']);if(s.input.title.trim().length<3)throw Error('Give the artwork a title of at least three characters.');s.phase='briefing';return event(s,'Idea recorded. Building the structured design brief.');
+  case 'BRIEF_READY':
+   requirePhase(s,['briefing']);s.brief={id:'DEMO-BRIEF-001',title:s.input.title.trim(),theme:s.input.theme,palette:ART_PALETTES[s.input.palette].name,orientation:s.input.orientation,ratio:s.input.orientation==='portrait'?'1 : 1.414':'1.414 : 1',approved:false};s.phase='brief';return event(s,'Design brief linked to the idea. Review is required.');
+  case 'EDIT_BRIEF':requirePhase(s,['brief']);s.phase='idea';s.brief=null;return event(s,'Brief returned for a change.');
+  case 'APPROVE_BRIEF':requirePhase(s,['brief']);s.brief.approved=true;s.phase='approved';return event(s,'Brief approved. Artwork stage unlocked.');
+  case 'RENDER':requirePhase(s,['approved']);s.phase='rendering';return event(s,'Creating the illustrative artwork preview.');
+  case 'ART_READY':requirePhase(s,['rendering']);s.artwork={id:'DEMO-ART-001',briefId:s.brief.id};s.phase='artwork';return event(s,'Artwork linked to its brief. Ready for output checks.');
+  case 'CHECK':requirePhase(s,['artwork','blocked','ready']);s.phase='checking';return event(s,'Checking sample dimensions, approval and print requirements.');
+  case 'CHECKED':{
+   requirePhase(s,['checking']);const p=printSpec(s.input);const enough=p.source[0]>=p.pixels[0]&&p.source[1]>=p.pixels[1];
+   s.checks=[
+    {key:'approval',label:'Brief approval',ok:!!s.brief?.approved,detail:'Artwork is linked to an approved brief.'},
+    {key:'orientation',label:'Orientation',ok:s.brief.orientation===s.input.orientation,detail:`${s.input.orientation} · ${s.brief.ratio}`},
+    {key:'resolution',label:'Sample source resolution',ok:enough,detail:`${p.source.join(' × ')} px available; ${p.pixels.join(' × ')} px required at 300 DPI.`},
+    {key:'bleed',label:'Bleed specification',ok:true,detail:`4 mm on each edge · ${p.fullWidth} × ${p.fullHeight} mm full size.`}
+   ];s.phase=s.checks.every(c=>c.ok)?'ready':'blocked';return event(s,enough?'All sample checks passed. Output package unlocked.':'Resolution check blocked the package. Try the print-resolution sample.');
+  }
+  case 'PACKAGE':requirePhase(s,['ready']);if(!s.checks?.every(c=>c.ok))throw Error('Resolve the failed checks first.');s.phase='packaging';return event(s,'Preparing the sample artwork and workflow record.');
+  case 'PACKAGED':requirePhase(s,['packaging']);s.phase='complete';s.output={id:'DEMO-PACK-001',name:s.input.title,format:s.input.format,orientation:s.input.orientation,spec:printSpec(s.input),files:['Illustrative artwork.svg','Workflow record.json']};return event(s,'Sample package ready to download. No listing has been published.');
+  default:throw Error('Unknown artwork action.');
+ }
+}
+
+export const escapeXml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
+export function shirtSvg(input,prefix='shirt'){
+ const c=SHIRT_COLOURS[input.colour];
+ const words=input.text.trim().split(/\s+/);let lines=[''];
+ for(const word of words){const last=lines.length-1;if((lines[last]+' '+word).trim().length>14&&lines[last])lines.push(word);else lines[last]=(lines[last]+' '+word).trim();}
+ lines=lines.slice(0,4);const longest=Math.max(6,...lines.map(l=>l.length));const size=Math.min(input.style==='minimal'?27:37,205/(longest*.64));
+ const font=input.style==='editorial'?'Georgia,serif':input.style==='varsity'?'Arial Black,Arial,sans-serif':'Arial,sans-serif';
+ const weight=input.style==='minimal'?'400':'700';const y=224-(lines.length-1)*size*.52;
+ const text=lines.map((l,i)=>`<text x="230" y="${y+i*size*1.12}" text-anchor="middle" fill="${c.ink}" font-family="${font}" font-weight="${weight}" font-size="${size}" letter-spacing="${input.style==='minimal'?1.4:-.6}">${escapeXml(l)}</text>`).join('');
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 490" role="img" aria-label="Illustrative ${escapeXml(c.name)} shirt with ${escapeXml(input.text||'your design')}" ><defs><linearGradient id="${prefix}-fabric" x1="0" x2="1"><stop stop-color="${c.shade}"/><stop offset=".23" stop-color="${c.fabric}"/><stop offset=".75" stop-color="${c.fabric}"/><stop offset="1" stop-color="${c.shade}"/></linearGradient><filter id="${prefix}-shadow" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#283c2f" flood-opacity=".16"/></filter></defs><ellipse cx="230" cy="443" rx="137" ry="13" fill="#233b2e" opacity=".09"/><g filter="url(#${prefix}-shadow)"><path d="M160 45 111 66 32 135 83 192 132 157 126 425Q230 445 334 425L328 157 377 192 428 135 349 66 300 45Q282 88 230 89T160 45Z" fill="url(#${prefix}-fabric)" stroke="${c.shade}" stroke-width="1.4"/><path d="M160 45Q175 104 230 103T300 45L289 49Q276 88 230 89T171 49Z" fill="${c.shade}" opacity=".65"/><path d="M111 66Q125 111 132 157M349 66Q335 111 328 157M48 135 87 177M412 135 373 177M137 416Q230 432 323 416" stroke="${c.shade}" stroke-width="2" fill="none" opacity=".7"/><path d="M144 184Q158 265 140 388M316 184Q305 286 320 385" stroke="${c.shade}" stroke-width="2" fill="none" opacity=".25"/>${text}${input.style==='varsity'?`<path d="M160 ${y+lines.length*size*1.12+4}H300" stroke="${c.ink}" stroke-width="3"/>`:''}</g></svg>`;
+}
+export function artworkSvg(input,prefix='art',exportSize=null){
+ const p=ART_PALETTES[input.palette];const w=input.orientation==='portrait'?600:848,h=input.orientation==='portrait'?848:600;
+ const shift=[...input.title].reduce((a,c)=>a+c.charCodeAt(0),0)%55;
+ let shapes='';
+ if(input.theme==='coast')shapes=`<circle cx="${w*.72}" cy="${h*.27}" r="${w*.09}" fill="${p.accent}"/><path d="M0 ${h*.48}Q${w*.3} ${h*.37} ${w*.57} ${h*.49}T${w} ${h*.44}V${h}H0Z" fill="${p.mid}"/><path d="M0 ${h*.59}Q${w*.38} ${h*.44} ${w} ${h*.63}V${h}H0Z" fill="${p.dark}"/><path d="M0 ${h*.75}Q${w*.3} ${h*.61} ${w*.52} ${h*.75}T${w} ${h*.76}V${h}H0Z" fill="${p.light}"/><path d="M0 ${h*.72}Q${w*.3} ${h*.58} ${w*.52} ${h*.72}T${w} ${h*.73}" stroke="${p.light}" stroke-width="3" fill="none" opacity=".65"/><path d="M0 ${h*.87}Q${w*.5} ${h*.73} ${w} ${h*.9}" stroke="${p.accent}" stroke-width="2" fill="none" opacity=".5"/>`;
+ else if(input.theme==='mountains')shapes=`<circle cx="${w*.73}" cy="${h*.22}" r="${w*.095}" fill="${p.accent}"/><path d="M-${w*.2} ${h*.73} ${w*.3} ${h*.27} ${w*.69} ${h*.73}Z" fill="${p.mid}"/><path d="M${w*.2} ${h*.79} ${w*.68} ${h*.34} ${w*1.1} ${h*.79}Z" fill="${p.dark}"/><path d="M${w*.19} ${h*.37} ${w*.3} ${h*.27} ${w*.41} ${h*.4} ${w*.31} ${h*.36} ${w*.27} ${h*.39}Z" fill="${p.light}"/><path d="M0 ${h*.72}Q${w*.5} ${h*.63} ${w} ${h*.77}V${h}H0Z" fill="${p.light}"/><path d="M0 ${h*.88}Q${w*.45} ${h*.72} ${w} ${h*.88}V${h}H0Z" fill="${p.mid}"/>`;
+ else shapes=`<rect x="${w*.13}" y="${h*.18}" width="${w*.43}" height="${h*.67}" rx="${w*.215}" fill="${p.dark}"/><circle cx="${w*.66}" cy="${h*.36}" r="${w*.2}" fill="${p.accent}"/><path d="M${w*.46} ${h*.58}h${w*.36}v${h*.24}h-${w*.36}Z" fill="${p.mid}"/><path d="M${w*.1} ${h*.68}Q${w*.52} ${h*.48} ${w*.89} ${h*.7}" stroke="${p.light}" stroke-width="${w*.025}" fill="none"/><circle cx="${w*.7}" cy="${h*.75}" r="${w*.06}" fill="${p.light}"/>`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" ${exportSize?`width="${exportSize.fullWidth}mm" height="${exportSize.fullHeight}mm"`:''} viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustrative ${escapeXml(input.theme)} artwork in ${escapeXml(p.name)}"><defs><linearGradient id="${prefix}-sky" x2=".3" y2="1"><stop stop-color="${p.sky}"/><stop offset="1" stop-color="${p.light}"/></linearGradient><pattern id="${prefix}-grain" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="2" cy="3" r=".6" fill="#fff" opacity=".17"/><circle cx="7" cy="8" r=".45" fill="#122e29" opacity=".07"/></pattern></defs><rect width="${w}" height="${h}" fill="url(#${prefix}-sky)"/><g transform="translate(0 ${shift-27})">${shapes}</g><rect width="${w}" height="${h}" fill="url(#${prefix}-grain)"/></svg>`;
+}
